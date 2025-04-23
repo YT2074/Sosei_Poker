@@ -10,7 +10,7 @@ public class KnowledgeClass {
 
 	// 過去10回分のゲーム履歴情報
 	// n回前のゲーム情報をhistory[n-1]に記憶
-	InfoClass[] history = new InfoClass[10];
+	InfoClass[] history = new InfoClass[1000];
 
 	String decision; // コールorドロップの宣言用
 	String bid; // ビッド額宣言用
@@ -54,20 +54,28 @@ public class KnowledgeClass {
 		// 履歴 history から自分のカード mycard を予測する
 		// 履歴から予測できない場合は初期値9としておく。
 		int mycard =9;
+		int history_hit_cnt = 0; // ヒットした履歴の数
+
+		
 
 		// 現在の相手のビッド額と同じビッド額を、過去に相手が賭けていれば、
 		// 自分のカードは、そのときのカードと同じであると予測する。
 		for(int i=0; i<history.length;i++){
 
-		    // 相手が今回と同じビッド額をかけたゲームが複数あっても
-		    // そのゲームの中から最新の情報だけを用いる。
+		    // 相手が今回と同じビッド額をかけたゲームが複数ある場合、
+		    // そのときの自分のカードを足していく。
 		    if(current.opponent_bid == history[i].opponent_bid){
-			mycard = history[i].my_card;
-			break;                            
+				mycard += history[i].my_card;
+				history_hit_cnt++;                            
 		    }
 		}
-
-                //予測した mycard よりも相手のカードが強いとドロップ
+		if (history_hit_cnt > 0) { // ヒットした履歴があれば、
+			mycard = mycard / history_hit_cnt; // ヒットした履歴の数で割る
+		}
+		else { // ヒットした履歴がなければ、mycard は 9 のまま
+			mycard = 9; // ヒットした履歴がなければ、mycard は 9 のまま
+		}
+        //予測した mycard よりも相手のカードが強いとドロップ
 		if (current.opponent_card > mycard)
 			decision = "d";
 		else
@@ -76,6 +84,38 @@ public class KnowledgeClass {
 		// 返り値は String クラスで
 		return decision;
 	}
+
+	private String mode_a_decision(){
+		decision = "n"; // 初期化
+		if (current.opponent_card == 2 || current.opponent_card ==3){
+			decision = "c";
+		}
+		else if (current.opponent_card == 4 || current.opponent_card == 5 || current.opponent_card == 6){
+			if (current.opponent_card-current.my_card >= 4){
+				decision = "d";
+			}else{
+				decision = "c";
+			}
+		}
+		else if (current.opponent_card == 7 || current.opponent_card == 8 || current.opponent_card == 9){
+			if (current.opponent_card-current.my_card >= 3){
+				decision = "d";
+			}else{
+				decision = "c";
+			}
+		}
+		else if (current.opponent_card == 10 || current.opponent_card == 11 || current.opponent_card == 12){
+			if (current.opponent_card-current.my_card >= 2){
+				decision = "d";
+			}else{
+				decision = "c";
+			}
+		}
+		else if (current.opponent_card == 13 || current.opponent_card == 14){
+			decision = "d";
+		}
+		return decision
+	} 
 
 
 	// historyに直前のゲーム情報 previous を格納する
