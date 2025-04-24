@@ -41,9 +41,29 @@ public class KnowledgeClass {
 
 		// 返り値は String クラスで
 		bid = "" + b;
-
 		return bid;
+	}
 
+	private String mode_a_bid(){
+		bid = ""; // 初期化
+		int b = 0; // ビッド額
+		if(11 <= current.opponent_card <= 14){
+			b = 1;
+		}
+		else if (7 <= current.opponent_card <= 10){
+			b = 2;
+		}
+		else if (5 <= current.opponent_card <= 6){
+			b = 3;
+		}
+		else if (3 <= current.opponent_card <= 4){
+			b = 4;
+		}
+		else{
+			b = 5;
+		}
+		bid = "" + b;
+		return bid;
 	}
 
 	// コール or ドロップの決定ルール
@@ -55,9 +75,6 @@ public class KnowledgeClass {
 		// 履歴から予測できない場合は初期値9としておく。
 		int mycard =9;
 		int history_hit_cnt = 0; // ヒットした履歴の数
-
-		
-
 		// 現在の相手のビッド額と同じビッド額を、過去に相手が賭けていれば、
 		// 自分のカードは、そのときのカードと同じであると予測する。
 		for(int i=0; i<history.length;i++){
@@ -114,7 +131,7 @@ public class KnowledgeClass {
 		else if (current.opponent_card == 13 || current.opponent_card == 14){
 			decision = "d";
 		}
-		return decision
+		return decision;
 	} 
 
 
