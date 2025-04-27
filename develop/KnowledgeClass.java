@@ -8,7 +8,7 @@ public class KnowledgeClass {
 	InfoClass current = new InfoClass(); // ゲーム情報
 	InfoClass previous = new InfoClass(); // 直前のゲーム情報
 
-	// 過去10回分のゲーム履歴情報
+	// 過去1000回分のゲーム履歴情報
 	// n回前のゲーム情報をhistory[n-1]に記憶
 	InfoClass[] history = new InfoClass[1000];
 
@@ -26,19 +26,28 @@ public class KnowledgeClass {
 		int b;
 		bid = "";
 		HistoryUpdate(); // ビッドする前にゲーム履歴情報を更新する
-		//ビッドの値をデフォルト関数を使うかa_mode関数を使うかランダムで決定する
-		if (Math.random() < 0.5) {
+
+		// ビッドの値をデフォルト関数を使うかa_mode関数を使うかランダムで決定する
+		if (Math.random() < 0.8) {
 			b = bid_default(); // デフォルト関数を使う
 		} else {
 			b = bid_mode_a(); // a_mode関数を使う
 		}
-			// ビッド額のチェック(自分の残金、相手の残金を超えた額は宣言できない)
+
+		// ビッド額のチェック(自分の残金、相手の残金を超えた額は宣言できない)
 		if (b > current.opponent_money)
 			b = current.opponent_money;
 		if (b > current.my_money)
 			b = current.my_money;
-		return ""+b; // 戻り値を明示的に指定
-		
+
+		// ビッド額が1から5の間に
+		if (b < 1) {
+			b = 1;
+		} else if (b > 5) {
+			b = 5;
+		}
+
+		return "" + b; // 戻り値を明示的に指定
 	}
 
 	public int bid_default() {
@@ -74,38 +83,21 @@ public class KnowledgeClass {
 		} else {
 			decision = decision_mode_a(); // a_mode関数を使う
 		}
-		return decision; // 戻り値を明示的に指定
+		return decision;
 	}
 
 	public String decision_default() {
-
 		decision = "n"; // 初期化
 
 		// 履歴 history から自分のカード mycard を予測する
-		// 履歴から予測できない場合は初期値9としておく。
-		int mycard = 9;
-		int history_hit_cnt = 0; // ヒットした履歴の数
-		// 現在の相手のビッド額と同じビッド額を、過去に相手が賭けていれば、
-		// 自分のカードは、そのときのカードと同じであると予測する。
-		for (int i = 0; i < history.length; i++) {
+		int mycard = predictOpponentCard();
 
-			// 相手が今回と同じビッド額をかけたゲームが複数ある場合、
-			// そのときの自分のカードを足していく。
-			if (current.opponent_bid == history[i].opponent_bid) {
-				mycard += history[i].my_card;
-				history_hit_cnt++;
-			}
-		}
-		if (history_hit_cnt > 0) { // ヒットした履歴があれば、
-			mycard = mycard / history_hit_cnt; // ヒットした履歴の数で割る
-		} else { // ヒットした履歴がなければ、mycard は 9 のまま
-			mycard = 9; // ヒットした履歴がなければ、mycard は 9 のまま
-		}
-		//予測した mycard よりも相手のカードが強いとドロップ
-		if (current.opponent_card > mycard)
+		// 予測した mycard よりも相手のカードが強いとドロップ
+		if (current.opponent_card > mycard) {
 			decision = "d";
-		else
+		} else {
 			decision = "c";
+		}
 
 		// 返り値は String クラスで
 		return decision;
@@ -166,6 +158,37 @@ public class KnowledgeClass {
 		tmpInfo.opponent_money = Info.opponent_money;
 		return tmpInfo;
 
+	}
+
+	// ブラフ判定関数
+	public boolean isBluffing(int opponentCard, int opponentBid) {
+		boolean isLowCard = opponentCard < 5; // カードが低いか
+		boolean isHighBid = opponentBid > opponentCard * 2; // ビッド額がカードの2倍を超えているか
+
+		return isLowCard && isHighBid; // 条件を満たせばブラフと判定
+	}
+
+	// 重み付きの相手カード予測関数
+	public int predictOpponentCard() {
+		int weightedSum = 0;
+		int weightTotal = 0;
+
+		// 過去の履歴を基に重み付けでカードを予測
+		for (int i = 0; i < history.length; i++) {
+			int weight = history.length - i; // 古い履歴ほど重みを小さくする
+			int cardValue = history[i].opponent_card;
+
+			weightedSum += cardValue * weight; // 重みを掛けたカード値を加算
+			weightTotal += weight; // 重みを加算
+		}
+
+		// 平均値を計算して返す
+		if (weightTotal > 0) {
+			double average = (double) weightedSum / weightTotal; // 平均値を計算
+			return (int) Math.round(average); // 四捨五入して整数に変換
+		} else {
+			return 9; // 予測がうまくできない場合は9を返す
+		}
 	}
 }
 
