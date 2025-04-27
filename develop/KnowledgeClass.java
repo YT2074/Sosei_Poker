@@ -28,16 +28,16 @@ public class KnowledgeClass {
 		HistoryUpdate(); // ビッドする前にゲーム履歴情報を更新する
 		//ビッドの値をデフォルト関数を使うかa_mode関数を使うかランダムで決定する
 		if (Math.random() < 0.5) {
-			bid = bid_default(); // デフォルト関数を使う
+			b = bid_default(); // デフォルト関数を使う
 		} else {
-			bid = bid_mode_a(); // a_mode関数を使う
+			b = bid_mode_a(); // a_mode関数を使う
 		}
 			// ビッド額のチェック(自分の残金、相手の残金を超えた額は宣言できない)
 		if (b > current.opponent_money)
 			b = current.opponent_money;
 		if (b > current.my_money)
 			b = current.my_money;
-		return bid; // 戻り値を明示的に指定
+		return ""+b; // 戻り値を明示的に指定
 		
 	}
 
@@ -47,9 +47,6 @@ public class KnowledgeClass {
 
 		b = Math.min(current.my_money, Math.min((current.my_money / 5) + 1,
 				(8 / (current.opponent_card + 1)) + 1));
-
-
-
 		return b;
 	}
 
