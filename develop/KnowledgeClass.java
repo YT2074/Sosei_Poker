@@ -90,7 +90,7 @@ public class KnowledgeClass {
 		decision = "n"; // 初期化
 
 		// 履歴 history から自分のカード mycard を予測する
-		int mycard = predictOpponentCard();
+		int mycard = predictOpponentCard(current.opponentBid);
 
 		// 予測した mycard よりも相手のカードが強いとドロップ
 		if (current.opponent_card > mycard) {
@@ -169,17 +169,18 @@ public class KnowledgeClass {
 	}
 
 	// 重み付きの相手カード予測関数
-	public int predictOpponentCard() {
+	public int predictOpponentCard(int opponentBid) {
 		int weightedSum = 0;
 		int weightTotal = 0;
 
 		// 過去の履歴を基に重み付けでカードを予測
 		for (int i = 0; i < history.length; i++) {
-			int weight = history.length - i; // 古い履歴ほど重みを小さくする
-			int cardValue = history[i].opponent_card;
-
-			weightedSum += cardValue * weight; // 重みを掛けたカード値を加算
-			weightTotal += weight; // 重みを加算
+			if (history[i].opponent_bid == opponentBid) {
+				int weight = history.length - i; // 古い履歴ほど重みを小さくする
+				int cardValue = history[i].opponent_card;
+				weightedSum += cardValue * weight; // 重みを掛けたカード値を加算
+				weightTotal += weight; // 重みを加算
+			}
 		}
 
 		// 平均値を計算して返す
