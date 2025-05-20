@@ -40,7 +40,8 @@ public class KnowledgeClass {
 			b = Math.min(current.my_money, Math.min((current.my_money / 5) + 1, 4));
 		}
 		else{
-			b = Math.min(current.my_money, Math.min((current.my_money / 5) + 1, (8 / (current.opponent_card + 1)) + 1));
+			b = Math.min(current.my_money, 
+				Math.min((current.my_money / 5) + 1, (8 / (current.opponent_card + 1)) + 1));
 		}
 
 		// ビッド額のチェック(自分の残金、相手の残金を超えた額は宣言できない)
@@ -90,7 +91,7 @@ public class KnowledgeClass {
 
 		//予測した mycard よりも相手のカードが弱いとcall
 		//相手のカードが弱いとcall
-		if (current.opponent_card < mycard || current.opponent_card < 5) {
+		if (current.opponent_card < mycard || current.opponent_card <= 5) {
 			decision = "c";
 		else{
 			decision = "d";
